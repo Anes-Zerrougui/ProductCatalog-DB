@@ -1,0 +1,33 @@
+@model ProductGroupDeleteViewModel
+@{
+    ViewData["Title"] = "Delete product group";
+    var blocked = Model.TotalProductCount > 0;
+}
+
+<h1 class="h3 mb-3">Delete product group</h1>
+
+<div class="card" style="max-width: 640px;">
+    <div class="card-body">
+        <h2 class="h5">@Model.GroupName</h2>
+        <p class="text-muted">@(string.IsNullOrWhiteSpace(Model.Description) ? "No description." : Model.Description)</p>
+
+        @if (blocked)
+        {
+            <div class="alert alert-warning">
+                This group cannot be deleted because it still has
+                <strong>@Model.ActiveProductCount</strong> active product(s)
+                (@Model.TotalProductCount in total, including deleted ones).
+                Move or remove its products first.
+            </div>
+            <a asp-action="Index" class="btn btn-outline-secondary">Back to list</a>
+        }
+        else
+        {
+            <p>Are you sure you want to delete this group? This cannot be undone.</p>
+            <form asp-action="Delete" asp-route-id="@Model.GroupId" method="post">
+                <button type="submit" class="btn btn-danger">Yes, delete</button>
+                <a asp-action="Index" class="btn btn-outline-secondary">Cancel</a>
+            </form>
+        }
+    </div>
+</div>

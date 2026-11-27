@@ -1,0 +1,13 @@
+@model ProductGroupFormViewModel
+
+<div class="mb-3">
+    <label asp-for="GroupName" class="form-label"></label>
+    <input asp-for="GroupName" class="form-control" maxlength="100" autofocus />
+    <span asp-validation-for="GroupName" class="text-danger"></span>
+</div>
+
+<div class="mb-3">
+    <label asp-for="Description" class="form-label"></label>
+    <textarea asp-for="Description" class="form-control" rows="3" maxlength="500"></textarea>
+    <span asp-validation-for="Description" class="text-danger"></span>
+</div>
