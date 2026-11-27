@@ -1,8 +1,23 @@
-﻿@{
-    ViewData["Title"] = "Home Page";
+@using System.Security.Claims
+@{
+    ViewData["Title"] = "Home";
+    var role = User.FindFirst(ClaimTypes.Role)?.Value;
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+<div class="py-4">
+    <h1 class="display-6">Welcome, @User.FindFirst("FullName")?.Value</h1>
+    <p class="lead">You are signed in as <strong>@role</strong>.</p>
+
+    @if (role == "Admin")
+    {
+        <p>You can manage users, product groups and products, and view the audit log.</p>
+    }
+    else if (role == "Editor")
+    {
+        <p>You can create, update and delete products, and search the catalog.</p>
+    }
+    else
+    {
+        <p>You have read-only access: you can list and search the catalog.</p>
+    }
 </div>
