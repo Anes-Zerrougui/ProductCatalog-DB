@@ -230,7 +230,7 @@ public partial class AppDbContext : DbContext
 
             entity.HasIndex(e => new { e.ProductId, e.DisplayOrder }, "uq_image_order").IsUnique();
 
-            entity.HasIndex(e => e.ProductId, "ux_image_one_primary")
+            entity.HasIndex(e => new { e.ProductId, e.IsPrimary }, "ux_image_one_primary")
                 .IsUnique()
                 .HasFilter("is_primary");
 
@@ -244,8 +244,8 @@ public partial class AppDbContext : DbContext
             entity.Property(e => e.IsPrimary).HasColumnName("is_primary");
             entity.Property(e => e.ProductId).HasColumnName("product_id");
 
-            entity.HasOne(d => d.Product).WithOne(p => p.ProductImage)
-                .HasForeignKey<ProductImage>(d => d.ProductId)
+            entity.HasOne(d => d.Product).WithMany(p => p.ProductImages)
+                .HasForeignKey(d => d.ProductId)
                 .HasConstraintName("product_image_product_id_fkey");
         });
 

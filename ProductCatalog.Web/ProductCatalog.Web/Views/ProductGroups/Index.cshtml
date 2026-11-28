@@ -51,7 +51,11 @@ else
                     <tr>
                         <td class="fw-semibold">@item.GroupName</td>
                         <td>@item.Description</td>
-                        <td class="text-center"><span class="badge bg-secondary">@item.ProductCount</span></td>
+                        <td class="text-center">
+                            <a asp-controller="Products" asp-action="Index" asp-route-groupId="@item.GroupId" class="text-decoration-none" title="Show these products">
+                                <span class="badge bg-secondary">@item.ProductCount</span>
+                            </a>
+                        </td>
                         <td>@item.UpdatedAt.ToLocalTime().ToString("yyyy-MM-dd HH:mm")</td>
                         @if (isAdmin)
                         {

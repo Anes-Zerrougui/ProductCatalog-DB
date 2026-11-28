@@ -27,6 +27,23 @@
     </div>
 </div>
 
+@if (Model.Images.Count > 0)
+{
+    var primary = Model.Images.FirstOrDefault(i => i.IsPrimary) ?? Model.Images[0];
+    <div class="mb-4">
+        <img src="@primary.Url" alt="@Model.ProductName" class="rounded border mb-2" style="max-height: 280px; max-width: 100%; object-fit: contain;" />
+        @if (Model.Images.Count > 1)
+        {
+            <div class="d-flex flex-wrap gap-2">
+                @foreach (var img in Model.Images)
+                {
+                    <img src="@img.Url" alt="" class="rounded border @(img == primary ? "border-primary border-2" : "")" style="height: 64px; width: 86px; object-fit: cover;" loading="lazy" />
+                }
+            </div>
+        }
+    </div>
+}
+
 <div class="card mb-4">
     <div class="card-body">
         <dl class="row mb-0">
@@ -42,6 +59,21 @@
             <dt class="col-sm-3">Description</dt>
             <dd class="col-sm-9">@(string.IsNullOrWhiteSpace(Model.Description) ? "—" : Model.Description)</dd>
 
+            <dt class="col-sm-3">Tags</dt>
+            <dd class="col-sm-9">
+                @if (Model.Tags.Count == 0)
+                {
+                    <span>—</span>
+                }
+                else
+                {
+                    foreach (var t in Model.Tags)
+                    {
+                        <a asp-action="Index" asp-route-tag="@t" class="badge bg-light text-dark border text-decoration-none">@t</a>
+                    }
+                }
+            </dd>
+
             <dt class="col-sm-3">Created</dt>
             <dd class="col-sm-9">@Model.CreatedAt.ToLocalTime().ToString("yyyy-MM-dd HH:mm")</dd>
 
@@ -50,6 +82,28 @@
         </dl>
     </div>
 </div>
+
+<h2 class="h5">Attributes</h2>
+@if (Model.Attributes.Count == 0)
+{
+    <p class="text-muted">No attributes.</p>
+}
+else
+{
+    <div class="table-responsive mb-4" style="max-width: 640px;">
+        <table class="table table-sm table-striped align-middle">
+            <tbody>
+                @foreach (var a in Model.Attributes)
+                {
+                    <tr>
+                        <th class="w-50">@a.Name</th>
+                        <td>@a.Value</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}
 
 <h2 class="h5">Price and stock history</h2>
 <p class="text-muted small">Written automatically by a database trigger every time the price or the stock changes.</p>

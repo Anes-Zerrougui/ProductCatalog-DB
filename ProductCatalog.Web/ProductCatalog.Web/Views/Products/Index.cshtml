@@ -28,20 +28,25 @@
     <input type="hidden" name="sort" value="@Model.Sort" />
     <input type="hidden" name="desc" value="@Model.Desc.ToString().ToLower()" />
 
-    <div class="col-md-4">
-        <input asp-for="Search" class="form-control" placeholder="Search by name or SKU" />
-    </div>
     <div class="col-md-3">
+        <input asp-for="Search" class="form-control" placeholder="Search name, SKU or attribute value" />
+    </div>
+    <div class="col-md-2">
         <select asp-for="GroupId" asp-items="Model.Groups" class="form-select">
             <option value="">All groups</option>
         </select>
     </div>
-    <div class="col-md-3">
+    <div class="col-md-2">
         <select asp-for="Status" asp-items="Model.Statuses" class="form-select">
             <option value="">All statuses</option>
         </select>
     </div>
-    <div class="col-md-2 d-flex gap-2">
+    <div class="col-md-2">
+        <select asp-for="Tag" asp-items="Model.Tags" class="form-select">
+            <option value="">All tags</option>
+        </select>
+    </div>
+    <div class="col-md-3 d-flex gap-2">
         <button type="submit" class="btn btn-outline-primary">Search</button>
         <a asp-action="Index" class="btn btn-outline-secondary">Clear</a>
     </div>
@@ -57,13 +62,13 @@ else
         <table class="table table-hover align-middle">
             <thead class="table-light">
                 <tr>
-                    <th><a class="text-decoration-none text-dark" asp-action="Index" asp-route-search="@Model.Search" asp-route-groupId="@Model.GroupId" asp-route-status="@Model.Status" asp-route-sort="name" asp-route-desc="@(NextDesc("name"))">Name @Arrow("name")</a></th>
-                    <th><a class="text-decoration-none text-dark" asp-action="Index" asp-route-search="@Model.Search" asp-route-groupId="@Model.GroupId" asp-route-status="@Model.Status" asp-route-sort="sku" asp-route-desc="@(NextDesc("sku"))">SKU @Arrow("sku")</a></th>
-                    <th><a class="text-decoration-none text-dark" asp-action="Index" asp-route-search="@Model.Search" asp-route-groupId="@Model.GroupId" asp-route-status="@Model.Status" asp-route-sort="group" asp-route-desc="@(NextDesc("group"))">Group @Arrow("group")</a></th>
-                    <th class="text-end"><a class="text-decoration-none text-dark" asp-action="Index" asp-route-search="@Model.Search" asp-route-groupId="@Model.GroupId" asp-route-status="@Model.Status" asp-route-sort="price" asp-route-desc="@(NextDesc("price"))">Price @Arrow("price")</a></th>
-                    <th class="text-center"><a class="text-decoration-none text-dark" asp-action="Index" asp-route-search="@Model.Search" asp-route-groupId="@Model.GroupId" asp-route-status="@Model.Status" asp-route-sort="stock" asp-route-desc="@(NextDesc("stock"))">Stock @Arrow("stock")</a></th>
-                    <th><a class="text-decoration-none text-dark" asp-action="Index" asp-route-search="@Model.Search" asp-route-groupId="@Model.GroupId" asp-route-status="@Model.Status" asp-route-sort="status" asp-route-desc="@(NextDesc("status"))">Status @Arrow("status")</a></th>
-                    <th><a class="text-decoration-none text-dark" asp-action="Index" asp-route-search="@Model.Search" asp-route-groupId="@Model.GroupId" asp-route-status="@Model.Status" asp-route-sort="updated" asp-route-desc="@(NextDesc("updated"))">Updated @Arrow("updated")</a></th>
+                    <th><a class="text-decoration-none text-dark" asp-action="Index" asp-route-search="@Model.Search" asp-route-groupId="@Model.GroupId" asp-route-status="@Model.Status" asp-route-tag="@Model.Tag" asp-route-sort="name" asp-route-desc="@(NextDesc("name"))">Name @Arrow("name")</a></th>
+                    <th><a class="text-decoration-none text-dark" asp-action="Index" asp-route-search="@Model.Search" asp-route-groupId="@Model.GroupId" asp-route-status="@Model.Status" asp-route-tag="@Model.Tag" asp-route-sort="sku" asp-route-desc="@(NextDesc("sku"))">SKU @Arrow("sku")</a></th>
+                    <th><a class="text-decoration-none text-dark" asp-action="Index" asp-route-search="@Model.Search" asp-route-groupId="@Model.GroupId" asp-route-status="@Model.Status" asp-route-tag="@Model.Tag" asp-route-sort="group" asp-route-desc="@(NextDesc("group"))">Group @Arrow("group")</a></th>
+                    <th class="text-end"><a class="text-decoration-none text-dark" asp-action="Index" asp-route-search="@Model.Search" asp-route-groupId="@Model.GroupId" asp-route-status="@Model.Status" asp-route-tag="@Model.Tag" asp-route-sort="price" asp-route-desc="@(NextDesc("price"))">Price @Arrow("price")</a></th>
+                    <th class="text-center"><a class="text-decoration-none text-dark" asp-action="Index" asp-route-search="@Model.Search" asp-route-groupId="@Model.GroupId" asp-route-status="@Model.Status" asp-route-tag="@Model.Tag" asp-route-sort="stock" asp-route-desc="@(NextDesc("stock"))">Stock @Arrow("stock")</a></th>
+                    <th><a class="text-decoration-none text-dark" asp-action="Index" asp-route-search="@Model.Search" asp-route-groupId="@Model.GroupId" asp-route-status="@Model.Status" asp-route-tag="@Model.Tag" asp-route-sort="status" asp-route-desc="@(NextDesc("status"))">Status @Arrow("status")</a></th>
+                    <th><a class="text-decoration-none text-dark" asp-action="Index" asp-route-search="@Model.Search" asp-route-groupId="@Model.GroupId" asp-route-status="@Model.Status" asp-route-tag="@Model.Tag" asp-route-sort="updated" asp-route-desc="@(NextDesc("updated"))">Updated @Arrow("updated")</a></th>
                     <th class="text-end">Actions</th>
                 </tr>
             </thead>
@@ -71,8 +76,29 @@ else
                 @foreach (var item in Model.Items)
                 {
                     <tr>
-                        <td class="fw-semibold">
-                            <a asp-action="Details" asp-route-id="@item.ProductId" class="text-decoration-none">@item.ProductName</a>
+                        <td>
+                            <div class="d-flex align-items-center gap-2">
+                                @if (!string.IsNullOrEmpty(item.PrimaryImageUrl))
+                                {
+                                    <img src="@item.PrimaryImageUrl" alt="" width="56" height="42" class="rounded border flex-shrink-0" style="object-fit: cover;" loading="lazy" />
+                                }
+                                else
+                                {
+                                    <div class="rounded border bg-light flex-shrink-0" style="width: 56px; height: 42px;"></div>
+                                }
+                                <div>
+                                    <a asp-action="Details" asp-route-id="@item.ProductId" class="fw-semibold text-decoration-none">@item.ProductName</a>
+                                    @if (item.Tags.Count > 0)
+                                    {
+                                        <div>
+                                            @foreach (var t in item.Tags)
+                                            {
+                                                <span class="badge bg-light text-dark border">@t</span>
+                                            }
+                                        </div>
+                                    }
+                                </div>
+                            </div>
                         </td>
                         <td><code>@item.Sku</code></td>
                         <td>@item.GroupName</td>
@@ -115,11 +141,11 @@ else
             <nav aria-label="Pages">
                 <ul class="pagination mb-0">
                     <li class="page-item @(Model.Page <= 1 ? "disabled" : "")">
-                        <a class="page-link" asp-action="Index" asp-route-search="@Model.Search" asp-route-groupId="@Model.GroupId" asp-route-status="@Model.Status" asp-route-sort="@Model.Sort" asp-route-desc="@Model.Desc" asp-route-page="@(Model.Page - 1)">Previous</a>
+                        <a class="page-link" asp-action="Index" asp-route-search="@Model.Search" asp-route-groupId="@Model.GroupId" asp-route-status="@Model.Status" asp-route-tag="@Model.Tag" asp-route-sort="@Model.Sort" asp-route-desc="@Model.Desc" asp-route-page="@(Model.Page - 1)">Previous</a>
                     </li>
                     <li class="page-item disabled"><span class="page-link">Page @Model.Page of @Model.TotalPages</span></li>
                     <li class="page-item @(Model.Page >= Model.TotalPages ? "disabled" : "")">
-                        <a class="page-link" asp-action="Index" asp-route-search="@Model.Search" asp-route-groupId="@Model.GroupId" asp-route-status="@Model.Status" asp-route-sort="@Model.Sort" asp-route-desc="@Model.Desc" asp-route-page="@(Model.Page + 1)">Next</a>
+                        <a class="page-link" asp-action="Index" asp-route-search="@Model.Search" asp-route-groupId="@Model.GroupId" asp-route-status="@Model.Status" asp-route-tag="@Model.Tag" asp-route-sort="@Model.Sort" asp-route-desc="@Model.Desc" asp-route-page="@(Model.Page + 1)">Next</a>
                     </li>
                 </ul>
             </nav>

@@ -59,3 +59,52 @@
     <textarea asp-for="Description" class="form-control" rows="4"></textarea>
     <span asp-validation-for="Description" class="text-danger"></span>
 </div>
+
+<hr class="my-4" />
+
+<h2 class="h6">Images</h2>
+<p class="text-muted small">
+    Paste image addresses (http or https). Choose the main image with the round button. Empty rows are ignored.
+    To add more, save first, then edit again: new empty rows appear.
+</p>
+@for (var i = 0; i < Model.Images.Count; i++)
+{
+    <div class="input-group mb-1">
+        <div class="input-group-text">
+            <input class="form-check-input mt-0" type="radio" name="PrimaryImageIndex" value="@i" checked="@(Model.PrimaryImageIndex == i)" title="Main image" />
+        </div>
+        <input asp-for="Images[i].ImageUrl" class="form-control" placeholder="https://..." />
+    </div>
+    <div class="mb-2"><span asp-validation-for="Images[i].ImageUrl" class="text-danger"></span></div>
+}
+
+<h2 class="h6 mt-4">Attributes</h2>
+<p class="text-muted small">Specifications such as RAM = 16 GB. Both fields are needed; empty rows are ignored.</p>
+@for (var i = 0; i < Model.Attributes.Count; i++)
+{
+    <div class="row g-2 mb-1">
+        <div class="col-md-5">
+            <input asp-for="Attributes[i].Name" class="form-control" placeholder="Name (for example RAM)" />
+        </div>
+        <div class="col-md-7">
+            <input asp-for="Attributes[i].Value" class="form-control" placeholder="Value (for example 16 GB)" />
+        </div>
+    </div>
+    <div class="mb-2">
+        <span asp-validation-for="Attributes[i].Name" class="text-danger"></span>
+        <span asp-validation-for="Attributes[i].Value" class="text-danger"></span>
+    </div>
+}
+
+<h2 class="h6 mt-4">Tags</h2>
+<div class="mb-4">
+    <input asp-for="TagsText" class="form-control" placeholder="business, portable" />
+    <div class="form-text">
+        Separate tags with commas. New tags are created automatically.
+        @if (Model.ExistingTags.Count > 0)
+        {
+            <span>Existing tags: @string.Join(", ", Model.ExistingTags)</span>
+        }
+    </div>
+    <span asp-validation-for="TagsText" class="text-danger"></span>
+</div>

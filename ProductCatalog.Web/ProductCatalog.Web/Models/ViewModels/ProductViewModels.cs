@@ -14,6 +14,8 @@ public class ProductListItem
     public int StockQuantity { get; set; }
     public string Status { get; set; } = string.Empty;
     public DateTime UpdatedAt { get; set; }
+    public string? PrimaryImageUrl { get; set; }
+    public List<string> Tags { get; set; } = new();
 }
 
 /// <summary>The list page: filters, sorting, paging and the rows.</summary>
@@ -22,6 +24,7 @@ public class ProductIndexViewModel
     public string? Search { get; set; }
     public int? GroupId { get; set; }
     public string? Status { get; set; }
+    public string? Tag { get; set; }
     public string Sort { get; set; } = "name";
     public bool Desc { get; set; }
 
@@ -33,6 +36,24 @@ public class ProductIndexViewModel
     public List<ProductListItem> Items { get; set; } = new();
     public List<SelectListItem> Groups { get; set; } = new();
     public List<SelectListItem> Statuses { get; set; } = new();
+    public List<SelectListItem> Tags { get; set; } = new();
+}
+
+/// <summary>One image row in the product form.</summary>
+public class ProductImageInput
+{
+    [StringLength(500, ErrorMessage = "The address can be at most 500 characters.")]
+    public string? ImageUrl { get; set; }
+}
+
+/// <summary>One attribute row (name + value) in the product form.</summary>
+public class ProductAttributeInput
+{
+    [StringLength(100, ErrorMessage = "Name can be at most 100 characters.")]
+    public string? Name { get; set; }
+
+    [StringLength(255, ErrorMessage = "Value can be at most 255 characters.")]
+    public string? Value { get; set; }
 }
 
 /// <summary>Used by both the Create and the Edit form.</summary>
@@ -75,8 +96,19 @@ public class ProductFormViewModel
     [Display(Name = "Product group")]
     public int? GroupId { get; set; }
 
+    // --- one-to-many parts of the product ---
+    public List<ProductImageInput> Images { get; set; } = new();
+    public int PrimaryImageIndex { get; set; }
+    public List<ProductAttributeInput> Attributes { get; set; } = new();
+
+    // --- many-to-many part: tags typed as "business, portable" ---
+    [Display(Name = "Tags")]
+    public string? TagsText { get; set; }
+
+    // dropdown data and hints (not posted)
     public List<SelectListItem> Groups { get; set; } = new();
     public List<SelectListItem> Statuses { get; set; } = new();
+    public List<string> ExistingTags { get; set; } = new();
 }
 
 public class ProductHistoryItem
@@ -87,6 +119,18 @@ public class ProductHistoryItem
     public decimal? NewPrice { get; set; }
     public int? OldStock { get; set; }
     public int? NewStock { get; set; }
+}
+
+public class ProductImageItem
+{
+    public string Url { get; set; } = string.Empty;
+    public bool IsPrimary { get; set; }
+}
+
+public class ProductAttributeItem
+{
+    public string Name { get; set; } = string.Empty;
+    public string Value { get; set; } = string.Empty;
 }
 
 public class ProductDetailsViewModel
@@ -101,6 +145,10 @@ public class ProductDetailsViewModel
     public string GroupName { get; set; } = string.Empty;
     public DateTime CreatedAt { get; set; }
     public DateTime UpdatedAt { get; set; }
+
+    public List<ProductImageItem> Images { get; set; } = new();
+    public List<ProductAttributeItem> Attributes { get; set; } = new();
+    public List<string> Tags { get; set; } = new();
 
     /// <summary>Last price/stock changes, written automatically by the audit trigger.</summary>
     public List<ProductHistoryItem> History { get; set; } = new();
