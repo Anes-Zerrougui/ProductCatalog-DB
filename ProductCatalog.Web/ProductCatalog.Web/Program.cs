@@ -1,7 +1,14 @@
+using System.Globalization;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using ProductCatalog.Web.Models.Data;
+
+// Fixed culture: decimal numbers always use "." (browsers send 1299.50, not 1299,50).
+// Without this, a Turkish Windows setup would read prices wrongly.
+var culture = new CultureInfo("en-US");
+CultureInfo.DefaultThreadCurrentCulture = culture;
+CultureInfo.DefaultThreadCurrentUICulture = culture;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -16,6 +23,10 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 builder.Services.AddControllersWithViews(options =>
 {
     options.Filters.Add(new AutoValidateAntiforgeryTokenAttribute());
+
+    // Only fields marked [Required] are required. Without this, MVC would treat every
+    // non-nullable property (for example the dropdown lists) as required and reject the form.
+    options.SuppressImplicitRequiredAttributeForNonNullableReferenceTypes = true;
 });
 
 // --- Cookie login ---

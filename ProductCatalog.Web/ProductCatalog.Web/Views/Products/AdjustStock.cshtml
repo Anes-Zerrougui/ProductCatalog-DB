@@ -1,0 +1,31 @@
+@model AdjustStockViewModel
+@{
+    ViewData["Title"] = "Adjust stock";
+}
+
+<h1 class="h3 mb-3">Adjust stock</h1>
+
+<div class="card" style="max-width: 640px;">
+    <div class="card-body">
+        <h2 class="h5 mb-1">@Model.ProductName</h2>
+        <p class="text-muted">SKU <code>@Model.Sku</code> · Current stock: <strong>@Model.CurrentStock</strong></p>
+
+        <form asp-action="AdjustStock" asp-route-id="@Model.ProductId" method="post">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+            <div class="mb-3">
+                <label asp-for="Amount" class="form-label"></label>
+                <input asp-for="Amount" type="number" step="1" class="form-control" autofocus />
+                <div class="form-text">Use a positive number to add stock (for example 10) and a negative number to remove stock (for example -3).</div>
+                <span asp-validation-for="Amount" class="text-danger"></span>
+            </div>
+
+            <button type="submit" class="btn btn-success">Apply change</button>
+            <a asp-action="Details" asp-route-id="@Model.ProductId" class="btn btn-outline-secondary">Cancel</a>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

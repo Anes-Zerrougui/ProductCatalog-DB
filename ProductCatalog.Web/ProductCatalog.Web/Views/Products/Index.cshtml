@@ -1,0 +1,128 @@
+@model ProductIndexViewModel
+@{
+    ViewData["Title"] = "Products";
+    var canEdit = User.IsInRole(AppRoles.Admin) || User.IsInRole(AppRoles.Editor);
+
+    string Arrow(string col) => Model.Sort == col ? (Model.Desc ? "▼" : "▲") : "";
+    bool NextDesc(string col) => Model.Sort == col && !Model.Desc;
+    string BadgeClass(string status) => status switch
+    {
+        "Active" => "bg-success",
+        "Inactive" => "bg-dark",
+        _ => "bg-secondary"
+    };
+
+    var firstItem = Model.TotalCount == 0 ? 0 : (Model.Page - 1) * Model.PageSize + 1;
+    var lastItem = Math.Min(Model.Page * Model.PageSize, Model.TotalCount);
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h1 class="h3 mb-0">Products</h1>
+    @if (canEdit)
+    {
+        <a asp-action="Create" class="btn btn-primary">+ New product</a>
+    }
+</div>
+
+<form method="get" asp-action="Index" class="row g-2 mb-3">
+    <input type="hidden" name="sort" value="@Model.Sort" />
+    <input type="hidden" name="desc" value="@Model.Desc.ToString().ToLower()" />
+
+    <div class="col-md-4">
+        <input asp-for="Search" class="form-control" placeholder="Search by name or SKU" />
+    </div>
+    <div class="col-md-3">
+        <select asp-for="GroupId" asp-items="Model.Groups" class="form-select">
+            <option value="">All groups</option>
+        </select>
+    </div>
+    <div class="col-md-3">
+        <select asp-for="Status" asp-items="Model.Statuses" class="form-select">
+            <option value="">All statuses</option>
+        </select>
+    </div>
+    <div class="col-md-2 d-flex gap-2">
+        <button type="submit" class="btn btn-outline-primary">Search</button>
+        <a asp-action="Index" class="btn btn-outline-secondary">Clear</a>
+    </div>
+</form>
+
+@if (Model.Items.Count == 0)
+{
+    <div class="alert alert-info">No products found.</div>
+}
+else
+{
+    <div class="table-responsive">
+        <table class="table table-hover align-middle">
+            <thead class="table-light">
+                <tr>
+                    <th><a class="text-decoration-none text-dark" asp-action="Index" asp-route-search="@Model.Search" asp-route-groupId="@Model.GroupId" asp-route-status="@Model.Status" asp-route-sort="name" asp-route-desc="@(NextDesc("name"))">Name @Arrow("name")</a></th>
+                    <th><a class="text-decoration-none text-dark" asp-action="Index" asp-route-search="@Model.Search" asp-route-groupId="@Model.GroupId" asp-route-status="@Model.Status" asp-route-sort="sku" asp-route-desc="@(NextDesc("sku"))">SKU @Arrow("sku")</a></th>
+                    <th><a class="text-decoration-none text-dark" asp-action="Index" asp-route-search="@Model.Search" asp-route-groupId="@Model.GroupId" asp-route-status="@Model.Status" asp-route-sort="group" asp-route-desc="@(NextDesc("group"))">Group @Arrow("group")</a></th>
+                    <th class="text-end"><a class="text-decoration-none text-dark" asp-action="Index" asp-route-search="@Model.Search" asp-route-groupId="@Model.GroupId" asp-route-status="@Model.Status" asp-route-sort="price" asp-route-desc="@(NextDesc("price"))">Price @Arrow("price")</a></th>
+                    <th class="text-center"><a class="text-decoration-none text-dark" asp-action="Index" asp-route-search="@Model.Search" asp-route-groupId="@Model.GroupId" asp-route-status="@Model.Status" asp-route-sort="stock" asp-route-desc="@(NextDesc("stock"))">Stock @Arrow("stock")</a></th>
+                    <th><a class="text-decoration-none text-dark" asp-action="Index" asp-route-search="@Model.Search" asp-route-groupId="@Model.GroupId" asp-route-status="@Model.Status" asp-route-sort="status" asp-route-desc="@(NextDesc("status"))">Status @Arrow("status")</a></th>
+                    <th><a class="text-decoration-none text-dark" asp-action="Index" asp-route-search="@Model.Search" asp-route-groupId="@Model.GroupId" asp-route-status="@Model.Status" asp-route-sort="updated" asp-route-desc="@(NextDesc("updated"))">Updated @Arrow("updated")</a></th>
+                    <th class="text-end">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model.Items)
+                {
+                    <tr>
+                        <td class="fw-semibold">
+                            <a asp-action="Details" asp-route-id="@item.ProductId" class="text-decoration-none">@item.ProductName</a>
+                        </td>
+                        <td><code>@item.Sku</code></td>
+                        <td>@item.GroupName</td>
+                        <td class="text-end">@item.Price.ToString("N2")</td>
+                        <td class="text-center">
+                            @if (item.StockQuantity == 0)
+                            {
+                                <span class="badge bg-danger">Out of stock</span>
+                            }
+                            else if (item.StockQuantity <= 5)
+                            {
+                                <span class="badge bg-warning text-dark">@item.StockQuantity (low)</span>
+                            }
+                            else
+                            {
+                                <span>@item.StockQuantity</span>
+                            }
+                        </td>
+                        <td><span class="badge @BadgeClass(item.Status)">@item.Status</span></td>
+                        <td>@item.UpdatedAt.ToLocalTime().ToString("yyyy-MM-dd HH:mm")</td>
+                        <td class="text-end text-nowrap">
+                            <a asp-action="Details" asp-route-id="@item.ProductId" class="btn btn-sm btn-outline-secondary">View</a>
+                            @if (canEdit)
+                            {
+                                <a asp-action="Edit" asp-route-id="@item.ProductId" class="btn btn-sm btn-outline-primary">Edit</a>
+                                <a asp-action="Delete" asp-route-id="@item.ProductId" class="btn btn-sm btn-outline-danger">Delete</a>
+                            }
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+
+    <div class="d-flex justify-content-between align-items-center">
+        <span class="text-muted">Showing @firstItem–@lastItem of @Model.TotalCount</span>
+
+        @if (Model.TotalPages > 1)
+        {
+            <nav aria-label="Pages">
+                <ul class="pagination mb-0">
+                    <li class="page-item @(Model.Page <= 1 ? "disabled" : "")">
+                        <a class="page-link" asp-action="Index" asp-route-search="@Model.Search" asp-route-groupId="@Model.GroupId" asp-route-status="@Model.Status" asp-route-sort="@Model.Sort" asp-route-desc="@Model.Desc" asp-route-page="@(Model.Page - 1)">Previous</a>
+                    </li>
+                    <li class="page-item disabled"><span class="page-link">Page @Model.Page of @Model.TotalPages</span></li>
+                    <li class="page-item @(Model.Page >= Model.TotalPages ? "disabled" : "")">
+                        <a class="page-link" asp-action="Index" asp-route-search="@Model.Search" asp-route-groupId="@Model.GroupId" asp-route-status="@Model.Status" asp-route-sort="@Model.Sort" asp-route-desc="@Model.Desc" asp-route-page="@(Model.Page + 1)">Next</a>
+                    </li>
+                </ul>
+            </nav>
+        }
+    </div>
+}
